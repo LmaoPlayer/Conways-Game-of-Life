@@ -14,7 +14,8 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
-        int TickRate = 500;
+        string[] ShapeNamesForUsage;
+        int TickRate = 250;
         PictureBox Field = new PictureBox();
         string Cool;
         int FieldSize = 10;
@@ -75,7 +76,7 @@ namespace WindowsFormsApp1
             EndTheGame.Enabled = false;
 
             ShapeToUse.Location = new Point(NextStep.Location.X + NextStep.Width + 10, 0);
-            ShapeToUse.Items.Add("Pentagon");
+            
 
             PlaceTheShape.Click += new EventHandler(PlaceASelectedShape);
             PlaceTheShape.Size = new Size(SpeedUp.Width, SpeedUp.Height);
@@ -102,11 +103,15 @@ namespace WindowsFormsApp1
                     FriendList[i, j] = 0;
                 }
             }
-
+            SetTheFilesUp();
+            for (int i = 0; i < ShapeNamesForUsage.Length; i++)
+            {
+                ShapeToUse.Items.Add(ShapeNamesForUsage[i]);
+            }
         }
         private void PlaceASelectedShape(object sender, EventArgs e)
         {
-            if (ShapeToUse.Text == "")
+            if (!ShapeNamesForUsage.Contains(ShapeToUse.Text))
             {
                 ShapeToUse.Text = "Pentagon";
             }
@@ -158,7 +163,7 @@ namespace WindowsFormsApp1
 
                 Application.DoEvents();
 
-                await Task.Delay(16);
+                await Task.Delay(1);
             }
 
         }
@@ -212,18 +217,17 @@ namespace WindowsFormsApp1
             }
             Field.Invalidate();
         }
-        //new
         private void SpeedingGoBrr(object sender, EventArgs e)
         {
             if (!SpeedTheShitUp)
             {
-                TickRate = 250;
+                TickRate = 100;
                 SpeedTheShitUp = true;
                 SpeedUp.Text = "Slow down";
             }
             else
             {
-                TickRate = 500;
+                TickRate = 250;
                 SpeedTheShitUp = false;
                 SpeedUp.Text = "Speed up";
             }
@@ -252,6 +256,40 @@ namespace WindowsFormsApp1
             EndTheGame.Enabled = false;
             StartTheGame.Visible = true;
             StartTheGame.Enabled = true;
+        }
+        private void SetTheFilesUp()
+        {
+            string[] Files = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory);
+            string[] SplittedText = new string[Files.Length];
+            int TotalFileCount = 0;
+            for (int i = 0; i < Files.Length; i++)
+            {
+                if (Files[i].Contains(".txt"))
+                {
+                    SplittedText[i] = Path.GetFileName(Files[i]);
+                    if (SplittedText[i] != "")
+                    {
+                        TotalFileCount++;
+                    }
+                }
+            }
+            ShapeNamesForUsage = new string[TotalFileCount];
+            for (int i = 0; i < TotalFileCount; i++)
+            {
+                string[] tempPlaceHolder = SplittedText[i].Split('.');
+                if (tempPlaceHolder.Length == 0)
+                {
+                    ShapeNamesForUsage[i] = tempPlaceHolder[0];
+                }
+                else
+                {
+                    for (int j = 0; j < tempPlaceHolder.Length - 1; j++)
+                    {
+                        if (j == 0) ShapeNamesForUsage[i] = tempPlaceHolder[0];
+                        else ShapeNamesForUsage[i] += "." + tempPlaceHolder[j];
+                    }
+                }
+            }
         }
     }
 }
