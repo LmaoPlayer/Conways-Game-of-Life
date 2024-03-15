@@ -23,14 +23,19 @@ namespace WindowsFormsApp1
         int[,] FriendList;
         int AmmountOfFriends = 0;
         bool[,] GridCounting;
-        List<int> CoordsX = new List<int>();
-        List<int> CoordsY = new List<int>();
+        Button NextStep = new Button();
+        Button StartTheGame = new Button();
+        Button ResetTheGame = new Button();
+        Button SpeedUp = new Button();
+        bool StartedTheGame = false;
+        bool SpeedTheShitUp = false;
+        Button EndTheGame = new Button();
+        ComboBox ShapeToUse = new ComboBox();
+        Button PlaceTheShape = new Button();
         public Form1()
         {
             InitializeComponent();
             CreateField();
-            Read();
-            RunTheGame();
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -38,14 +43,53 @@ namespace WindowsFormsApp1
         }
         private void CreateField()
         {
-            
 
-            Field.Size = new Size(col*FieldSize, row*FieldSize);
+            StartTheGame.Click += new EventHandler(RunTheGame);
+            StartTheGame.Size = new Size(50, 20);
+            StartTheGame.Text = "Start";
+
+            ResetTheGame.Text = "Reset";
+            ResetTheGame.Click += new EventHandler(ResetIt);
+            ResetTheGame.Size = new Size(StartTheGame.Width, StartTheGame.Height);
+            ResetTheGame.Location = new Point(StartTheGame.Width, 0);
+
+            SpeedUp.Text = "Speed Up";
+            SpeedUp.Click += new EventHandler(SpeedingGoBrr);
+            SpeedUp.Size = new Size(ResetTheGame.Width, ResetTheGame.Height);
+            SpeedUp.Location = new Point(SpeedUp.Width + StartTheGame.Width, 0);
+
+            NextStep.Click += new EventHandler(NextStepPlease);
+            NextStep.Size = new Size(SpeedUp.Width, SpeedUp.Height);
+            NextStep.Location = new Point(SpeedUp.Location.X + SpeedUp.Width, 0);
+            NextStep.Text = "Step Over";
+
+            Field.Size = new Size(col * FieldSize, row * FieldSize);
             Field.BorderStyle = BorderStyle.FixedSingle;
-            Field.Location = new Point(5, 5);
+            Field.Location = new Point(5, StartTheGame.Height+10);
             Field.Paint += new PaintEventHandler(DrawTheCells);
 
+            EndTheGame.Click += new EventHandler(EndIt);
+            EndTheGame.Size = new Size(50, 20);
+            EndTheGame.Text = "Stop";
+            EndTheGame.Visible = false;
+            EndTheGame.Enabled = false;
+
+            ShapeToUse.Location = new Point(NextStep.Location.X + NextStep.Width + 10, 0);
+            ShapeToUse.Items.Add("Pentagon");
+
+            PlaceTheShape.Click += new EventHandler(PlaceASelectedShape);
+            PlaceTheShape.Size = new Size(SpeedUp.Width, SpeedUp.Height);
+            PlaceTheShape.Location = new Point(ShapeToUse.Location.X + ShapeToUse.Width + 10, 0);
+            PlaceTheShape.Text = "Place Shape";
+
             Controls.Add(Field);
+            Controls.Add(SpeedUp); 
+            Controls.Add(NextStep);
+            Controls.Add(EndTheGame);
+            Controls.Add(StartTheGame);
+            Controls.Add(ResetTheGame);
+            Controls.Add(ShapeToUse); 
+            Controls.Add(PlaceTheShape);
 
             FriendList = new int[col, row];
             GridCounting = new bool[col, row];
@@ -58,11 +102,15 @@ namespace WindowsFormsApp1
                     FriendList[i, j] = 0;
                 }
             }
-            
+
         }
-        private void Read()
+        private void PlaceASelectedShape(object sender, EventArgs e)
         {
-            Cool = File.ReadAllText("e.txt");
+            if (ShapeToUse.Text == "")
+            {
+                ShapeToUse.Text = "Pentagon";
+            }
+            Cool = File.ReadAllText(ShapeToUse.Text + ".txt");
             string[] Lines = Cool.Split('\n');
             for (int RepRow = 0; RepRow < Lines.Length; RepRow++)
             {
@@ -84,7 +132,7 @@ namespace WindowsFormsApp1
         {
             Graphics g = e.Graphics;
             SolidBrush ImaBrush = new SolidBrush(Color.Black);
-            for (int i = 0; i<col; i++)
+            for (int i = 0; i < col; i++)
             {
                 for (int j = 0; j < row; j++)
                 {
@@ -92,14 +140,19 @@ namespace WindowsFormsApp1
                     {
                         g.FillRectangle(ImaBrush, new Rectangle(new Point(i * FieldSize, j * FieldSize), new Size(FieldSize, FieldSize)));
                     }
-                    
+
                 }
             }
-            
+
         }
-        private async void RunTheGame()
+        private async void RunTheGame(object sender, EventArgs e)
         {
-            while (true)
+            StartedTheGame = true;
+            EndTheGame.Visible = true;
+            EndTheGame.Enabled = true;
+            StartTheGame.Visible = false;
+            StartTheGame.Enabled = false;
+            while (StartedTheGame)
             {
                 await UpdateTheCells();
 
@@ -111,9 +164,9 @@ namespace WindowsFormsApp1
         }
         private async Task UpdateTheCells()
         {
-            NextStepPlease();
+            NextStep.PerformClick();
 
-            await Task.Delay(1000);
+            await Task.Delay(TickRate);
         }
         private void CheckTheFriends()
         {
@@ -138,7 +191,7 @@ namespace WindowsFormsApp1
                 }
             }
         }
-        private void NextStepPlease()
+        private void NextStepPlease(object sender, EventArgs e)
         {
             CheckTheFriends();
             for (int Columns = 0; Columns < col; Columns++)
@@ -160,7 +213,7 @@ namespace WindowsFormsApp1
             Field.Invalidate();
         }
         //new
-/*        private void SpeedingGoBrr(object sender, EventArgs e)
+        private void SpeedingGoBrr(object sender, EventArgs e)
         {
             if (!SpeedTheShitUp)
             {
@@ -177,7 +230,6 @@ namespace WindowsFormsApp1
         }
         private void ResetIt(object sender, EventArgs e)
         {
-            Button HowWillIReset = (Button)sender;
 
             StartedTheGame = false;
             EndTheGame.Visible = false;
@@ -188,18 +240,10 @@ namespace WindowsFormsApp1
             {
                 for (int j = 0; j < row; j++)
                 {
-                    GridCounting[i, j] = true;
-                    if (HowWillIReset.Text == "Reset")
-                    {
-                        Grid[i, j].BackColor = Color.Transparent;
-                    }
-                    else
-                    {
-                        Controls.Remove(Grid[i, j]);
-                    }
-
+                    GridCounting[i, j] = false;
                 }
             }
+            Field.Invalidate();
         }
         private void EndIt(object sender, EventArgs e)
         {
@@ -209,5 +253,5 @@ namespace WindowsFormsApp1
             StartTheGame.Visible = true;
             StartTheGame.Enabled = true;
         }
-    }*/
+    }
 }
