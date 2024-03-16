@@ -28,3 +28,4 @@
 > - You can also delete the file that you have selected in the combo box.
 > - Lastly, the field has connected borders, which means that cells can interact with eachother at the other end of the field, like PacMan.
 
+> This is used for a school project, I have no plans on advancing it any further.
