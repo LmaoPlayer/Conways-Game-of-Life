@@ -33,6 +33,8 @@ namespace WindowsFormsApp1
         Button EndTheGame = new Button();
         ComboBox ShapeToUse = new ComboBox();
         Button PlaceTheShape = new Button();
+        Button ReloadFiles = new Button();
+        Button DeleteSelectedFile = new Button();
         public Form1()
         {
             InitializeComponent();
@@ -68,6 +70,7 @@ namespace WindowsFormsApp1
             Field.BorderStyle = BorderStyle.FixedSingle;
             Field.Location = new Point(5, StartTheGame.Height+10);
             Field.Paint += new PaintEventHandler(DrawTheCells);
+            Field.Click += new EventHandler(FieldClick);
 
             EndTheGame.Click += new EventHandler(EndIt);
             EndTheGame.Size = new Size(50, 20);
@@ -83,6 +86,17 @@ namespace WindowsFormsApp1
             PlaceTheShape.Location = new Point(ShapeToUse.Location.X + ShapeToUse.Width + 10, 0);
             PlaceTheShape.Text = "Place Shape";
 
+            ReloadFiles.Click += new EventHandler(SetTheFilesUp);
+            ReloadFiles.Size = new Size(SpeedUp.Width, SpeedUp.Height);
+            ReloadFiles.Location = new Point(PlaceTheShape.Location.X + PlaceTheShape.Width + 10, 0);
+            ReloadFiles.Text = "Reload Files";
+
+
+            DeleteSelectedFile.Click += new EventHandler(DeleteTheFile);
+            DeleteSelectedFile.Size = new Size(SpeedUp.Width, SpeedUp.Height);
+            DeleteSelectedFile.Location = new Point(ReloadFiles.Location.X + ReloadFiles.Width + 10, 0);
+            DeleteSelectedFile.Text = "Delete Selected File";
+
             Controls.Add(Field);
             Controls.Add(SpeedUp); 
             Controls.Add(NextStep);
@@ -91,6 +105,8 @@ namespace WindowsFormsApp1
             Controls.Add(ResetTheGame);
             Controls.Add(ShapeToUse); 
             Controls.Add(PlaceTheShape);
+            Controls.Add(ReloadFiles);
+            Controls.Add(DeleteSelectedFile);
 
             FriendList = new int[col, row];
             GridCounting = new bool[col, row];
@@ -103,11 +119,7 @@ namespace WindowsFormsApp1
                     FriendList[i, j] = 0;
                 }
             }
-            SetTheFilesUp();
-            for (int i = 0; i < ShapeNamesForUsage.Length; i++)
-            {
-                ShapeToUse.Items.Add(ShapeNamesForUsage[i]);
-            }
+            SetTheFilesUp(ReloadFiles, EventArgs.Empty);
         }
         private void PlaceASelectedShape(object sender, EventArgs e)
         {
@@ -257,8 +269,9 @@ namespace WindowsFormsApp1
             StartTheGame.Visible = true;
             StartTheGame.Enabled = true;
         }
-        private void SetTheFilesUp()
+        private void SetTheFilesUp(object sender, EventArgs e)
         {
+            ShapeToUse.Items.Clear();
             string[] Files = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory);
             string[] SplittedText = new string[Files.Length];
             int TotalFileCount = 0;
@@ -289,6 +302,28 @@ namespace WindowsFormsApp1
                         else ShapeNamesForUsage[i] += "." + tempPlaceHolder[j];
                     }
                 }
+            }
+
+            for (int i = 0; i < ShapeNamesForUsage.Length; i++)
+            {
+                ShapeToUse.Items.Add(ShapeNamesForUsage[i]);
+            }
+        }
+        private void FieldClick(object sender, EventArgs e)
+        {
+            MouseEventArgs Location = (MouseEventArgs)e;
+            int ArrayLocationX = Location.X / FieldSize;
+            int ArrayLocationY = Location.Y / FieldSize;
+            if (GridCounting[ArrayLocationX, ArrayLocationY]) GridCounting[ArrayLocationX, ArrayLocationY] = false;
+            else GridCounting[ArrayLocationX, ArrayLocationY] = true;
+            Field.Invalidate();
+        }
+        private void DeleteTheFile(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you sure you want to delete this file?", "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                File.Delete(ShapeToUse.Text + ".txt");
+                SetTheFilesUp(ReloadFiles, EventArgs.Empty);
             }
         }
     }
