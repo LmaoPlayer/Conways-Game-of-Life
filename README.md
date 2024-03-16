@@ -25,5 +25,6 @@
 > These files however need to end with .txt, all that comes infront of it don't matter.
 >> For a quick example of files, you can find them at [LifeWiki](https://conwaylife.com/wiki "A big website that contains a lot of shapes"), click on the links in the top right corner of the Wiki, select a shape you wish for, open the "Pattern files" on the sidebar and download the Plaintext.
 > - If this is done while the game is launched, you need to press the "Reload" button.
-> - Lastly, you can also delete the file that you have selected in the combo box.
+> - You can also delete the file that you have selected in the combo box.
+> - Lastly, the field has connected borders, which means that cells can interact with eachother at the other end of the field, like PacMan.
 
